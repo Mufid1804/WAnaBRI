@@ -3,15 +3,17 @@
 import requests
 import sys
 
+
 # Check domain response
 def check_status_code(domain):
     try:
-        response = requests.get(domain, timeout=5, allow_redirects=False)
+        response = requests.get(domain, timeout=10)
         if response.status_code == 200:
             return True
     except requests.RequestException:
         pass
     return False
+
 
 # Process domain and input into file
 def process_domain(input_file, output_file):
@@ -23,6 +25,7 @@ def process_domain(input_file, output_file):
                 outfile.write(domain + '\n')
             else:
                 print(f"Failed: {domain}")        
+
 
 # Main request function
 def main():
@@ -40,6 +43,6 @@ def main():
     process_domain(input_file, output_file)
     print("Processing complete.")
 
+
 if __name__ == "__main__":
     main()
-

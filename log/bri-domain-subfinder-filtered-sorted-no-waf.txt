@@ -1,0 +1,14 @@
+http://digital-admin.bri.co.id
+http://digital.bri.co.id
+https://api.brispot.bri.co.id
+https://brismartapi.bri.co.id
+https://ceria-payment-sandbox.bri.co.id
+https://ceria-web-app.dev.service.dce.bri.co.id
+https://commercialcard.bri.co.id
+https://digital-admin.bri.co.id
+https://digital.bri.co.id
+https://komoditi.bri.co.id
+https://myqr.bri.co.id
+https://myqrservice.bri.co.id
+https://tmsverifone.bri.co.id
+https://webview.komoditi.bri.co.id

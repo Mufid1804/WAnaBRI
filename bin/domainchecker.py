@@ -1,17 +1,18 @@
 import requests
 
+
 # Function to check the status code of a given domain
 def check_status_code(domain):
     try:
-        response = requests.get(domain, timeout=5, allow_redirects=False)
+        response = requests.get(domain, timeout=10)
         # Return True if the status code is 200
         if response.status_code == 200:
             return True
     except requests.RequestException as e:
-        # Log the exception if there's an issue with the request
         pass
     return False
-    
+
+
 # Function to process domains from an input file and write successful ones to an output file
 def process_domain(input_file, output_file):
     try:
@@ -27,14 +28,15 @@ def process_domain(input_file, output_file):
         # Handle the case where the input file is not found
         print(f"File not found: {str(e)}")
         exit(0)
-    except KeyboardInterrupt:\
-        # Handle Ctrl+C interruption\
+    except KeyboardInterrupt:
+        # Handle Ctrl+C interruption
         print("\nOperation interrupted by user. Exiting...")
         exit(0)
     except Exception as e:
         # Handle other unexpected errors
         print(f"An unexpected error occurred: {str(e)}")
         exit(0)
+
 
 # Main function to run the domain checker
 def domainchecker(input_file, output_file):
