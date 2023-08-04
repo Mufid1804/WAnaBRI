@@ -1,0 +1,11 @@
+blog.edge-security.com
+admin.edge-security.com
+sms.edge-security.com
+mx.edge-security.com
+smtp.edge-security.com
+webmail.edge-security.com
+www.edge-security.com
+pop3.edge-security.com
+ftp.edge-security.com
+imap.edge-security.com
+mail.edge-security.com

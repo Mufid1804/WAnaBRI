@@ -46,8 +46,6 @@ def domain_checker(input_file, output_file):
 	except KeyboardInterrupt:
 		print("\nOperation interrupted by user. Exiting.")
 
-	print("Processing complete.")
-
 # Entry point of the script
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Takes a domain names and checks their HTTP response status.')

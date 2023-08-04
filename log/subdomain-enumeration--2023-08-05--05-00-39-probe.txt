@@ -1,0 +1,9 @@
+http://sms.edge-security.com
+http://mail.edge-security.com
+http://mx.edge-security.com
+http://admin.edge-security.com
+http://webmail.edge-security.com
+http://www.edge-security.com
+https://sms.edge-security.com
+https://www.edge-security.com
+http://imap.edge-security.com
