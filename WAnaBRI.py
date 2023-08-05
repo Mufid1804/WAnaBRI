@@ -37,7 +37,7 @@ def check_tools_dependency():
 
     if not all_installed:
         print("One or more required tools are not installed. Exiting.")
-        print("Checnk installation guide at README.md")
+        print("Check installation guide at README.md")
         sys.exit(1)
 
 # Function to validate the output file path
@@ -92,7 +92,11 @@ def run_httprobe(input_file, output_file):
     loading_thread.start()
 
     command = f"cat {input_file} | httprobe > {output_file}"
-    subprocess.run(command, shell=True)
+    try:
+        subprocess.run(command, shell=True)
+    except subprocess.CalledProcessError:
+        print(f"{R}[!!]{E} An error occurred while running httprobe. Check httprobe dependency. Exiting.")
+        sys.exit(1)
 
     # Stop the loading animation
     stop_loading.set()
@@ -123,8 +127,12 @@ def continue_prompt():
 # Function to parse the target
 def parse_target(args):
     if args.target.endswith('.txt'):
-        with open(args.target, 'r') as file:
-            return [line.strip() for line in file.readlines()]
+        try:
+            with open(args.target, 'r') as file:
+                return [line.strip() for line in file.readlines()]
+        except FileNotFoundError:
+            print(f"{R}[!!]{E} The file {args.target} does not exist. Exiting.")
+            sys.exit(1)
     else:
         return [args.target]
 
