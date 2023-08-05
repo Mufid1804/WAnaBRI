@@ -67,7 +67,7 @@ $ chmod +x install_tools.sh
 $ ./install_tools.sh
 ```
 # Running WAnaBRI
-## Subdomain Enumeration
+### Subdomain Enumeration
 
 To run the subdomain enumeraton on a target, just use the following command.
 
