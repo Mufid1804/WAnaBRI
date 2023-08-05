@@ -10,13 +10,13 @@
 # Features
 
 <h1 align="left">
-  <img src="lib/img/WAnaBRI-run.png" alt="WAnaBRI" width="700px"></a>
+  <img src="lib/img/WAnaBRI-run.png" alt="WAnaBRI" width="450px"></a>
   <br>
 </h1>
 
-`WAnaBRI` is a specialized tool developed by Bank Rakyat Indonesia (BRI) for the purpose of analyzing web application firewalls (WAFs). As part of BRI's commitment to cybersecurity, this tool plays a crucial role in identifying and understanding the behavior of various WAFs.`WAnaBRI` serves as an essential component in BRI's ongoing efforts to maintain the integrity and security of its web applications and services.
+`WAnaBRI` is a specialized tool developed by Bank Rakyat Indonesia (BRI) for the purpose of analyzing web application firewalls (WAFs). As part of BRI's commitment to cybersecurity, this tool plays a crucial role in identifying and understanding the behavior of various WAFs. `WAnaBRI` serves as an essential component in BRI's ongoing efforts to maintain the integrity and security of its web applications and services.
 
-`WAnaBRI` has three main feature
+### `WAnaBRI` has three main feature
 - Subdomain enumeration
 - WAF footprinting (soon)
 - WAF testing (soon)
