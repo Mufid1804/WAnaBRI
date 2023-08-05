@@ -18,6 +18,16 @@ from version import __version__
 # Default Variables
 (W,Y,G,R,B,C,E) = Color.unpack()
 
+# Parser
+class CustArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        if "-S" in message and "-D" in message:
+            print("usage: WAnaBRI.py [MODE] -t <target> [OPT] [OTHERS]")
+            print(f"{R}[!!]{E} -S and -D cannot be used together. Exiting.")
+        else:
+            super().error(message)
+        sys.exit(1)
+
 # Tools dependency check
 def check_tools_dependency():
     tools = {
@@ -41,7 +51,7 @@ def check_tools_dependency():
         sys.exit(1)
 
 # Function to validate the output file path
-def validate_output(args):
+def validate_output(args, target):
     log_folder = Path('log')
     log_folder.mkdir(exist_ok=True)  # Create the log folder if it doesn't exist
 
@@ -49,14 +59,16 @@ def validate_output(args):
         file = log_folder / args.output
         if file.exists():
             print(f"{R}[!!]{E} The output file {args.output} already exists: Using default output file name")
-            return log_folder / f"subdomain-enumeration--{datetime.now().strftime('%Y-%m-%d--%H-%M-%S')}.txt"
+            return log_folder / f"subdomain-enumeration--{target}--{datetime.now().strftime('%Y-%m-%d--%H-%M-%S')}.txt"
         else:
             return file.resolve()
     else:
-        return log_folder / f"subdomain-enumeration--{datetime.now().strftime('%Y-%m-%d--%H-%M-%S')}.txt"
+        return log_folder / f"subdomain-enumeration--{target}--{datetime.now().strftime('%Y-%m-%d--%H-%M-%S')}.txt"
 
 # Function to run SubFinder for subdomain enumeration
-def subfinder(target, path):
+def subfinder(target, base_path):
+
+    # Start the SubFinder process
     stop_loading = threading.Event()
     command = f"subfinder -d {target} -o {path} -silent"
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -81,26 +93,7 @@ def subfinder(target, path):
     # Print the collected output
     print(f"\r{G}[~]{E} Done! Here's the output:\n")
     print("\n".join(output))
-    print(f"\n{G}[~]{E} File output saved to {B}{path}{E}")
-
-# Function to run httprobe for probing
-def run_httprobe(input_file, output_file):
-    stop_loading = threading.Event()
-    # Start the loading animation in a separate thread
-    loading_thread = threading.Thread(target=loading_animation, args=(stop_loading,))
-    loading_thread.daemon = True
-    loading_thread.start()
-
-    command = f"cat {input_file} | httprobe > {output_file}"
-    try:
-        subprocess.run(command, shell=True)
-    except subprocess.CalledProcessError:
-        print(f"{R}[!!]{E} An error occurred while running httprobe. Check httprobe dependency. Exiting.")
-        sys.exit(1)
-
-    # Stop the loading animation
-    stop_loading.set()
-    loading_thread.join(timeout=1)
+    print(f"\n{G}[~]{E} Subdomain enumeration finished: File output saved to {B}{path}{E}")
 
 # Loading animation function
 def loading_animation(stop_loading):
@@ -111,85 +104,96 @@ def loading_animation(stop_loading):
             sys.stdout.flush()
             time.sleep(0.2)
 
-# Function to prompt the user to continue
-def continue_prompt():
-    while True:
-        choice = input(f"{G}[+]{E} Do you want to continue? (Y/n): ")
-        if choice in ('', 'Y', 'y'):
-            print(f"{G}[~]{E} You chose 'yes'. Continuing...")
-            break
-        elif choice in ('N', 'n'):
-            print(f"{G}[~]{E} You chose 'no'. Exiting...")
-            sys.exit(1)
-        else:
-            print(f"{R}[!!]{E} Invalid choice. Please enter 'Y' or 'n', or press Enter for the default option.")
-
-# Function to parse the target
-def parse_target(args):
-    if args.target.endswith('.txt'):
-        try:
-            with open(args.target, 'r') as file:
-                return [line.strip() for line in file.readlines()]
-        except FileNotFoundError:
-            print(f"{R}[!!]{E} The file {args.target} does not exist. Exiting.")
-            sys.exit(1)
-    else:
-        return [args.target]
-
 # Main function
 if __name__ == "__main__":
-    # Check tools dependency
-    check_tools_dependency()
+    try:
+        # Check tools dependency
+        check_tools_dependency()
 
-    # Argument parsing
-    parser = argparse.ArgumentParser(description="Web Application Firewall (WAF) Analyser BRI - WAnaBRI")
-    parser.add_argument('-S', '--subdomain-enumeration', action='store_true', help='Enumerate subdomains using SubFinder')
-    parser.add_argument('-t', '--target', type=str, help='Target domain or path to a .txt file containing domains ex: -t bri.co.id or -t domains.txt')
-    parser.add_argument('-o', '--output', type=str, help='Name of the output file ex -o output.txt')
-    parser.add_argument('-V', '--version', action='store_true', default=False, help='Print out the current version of WAnaBRI and exit.')
-    parser.add_argument('--no-colors', dest='colors', action='store_false', default=True, help='Disable ANSI colors in output.')
+        # Argument parsing
+        parser = CustArgumentParser(description="Web Application Firewall (WAF) Analyzer BRI - WAnaBRI",
+                                         usage="WAnaBRI.py [MODE] -t <target> [OPT] [OTHERS]",
+                                         add_help=False)
+        # Target
+        target = parser.add_argument_group('Target')
+        target.add_argument('-t', '--target', type=str, help='Target domain or path to a .txt file containing domains, e.g., -t bri.co.id or -t domains.txt')
 
-    args = parser.parse_args()
+        # Mode
+        mode_group = parser.add_argument_group('Mode')
+        exclusive_group = mode_group.add_mutually_exclusive_group()
+        exclusive_group.add_argument('-S', '--subdomain-enumeration', action='store_true', help='Enumerate subdomains using SubFinder. Accepts only one target domain, e.g., -S bri.co.id')
+        exclusive_group.add_argument('-D', '--domain-checker', action='store_true', help='Filter 200 HTTP/HTTPS responses using the domain_checker tool. Accepts only a file, e.g., -D domains.txt')
+        
+        # Options
+        options_group = parser.add_argument_group('Options')
+        options_group.add_argument('--no-filter', action='store_false', dest='filter', help='Disable filtering of 200 HTTP/HTTPS responses using the domain_checker tool. Default is True.')
+        options_group.add_argument('-o', '--output', type=str, help='Name of the output file, e.g., -o output.txt. If not, default will be used.')
+        
+        # Others
+        others_group = parser.add_argument_group('Others')
+        others_group.add_argument('-V', '--version', action='store_true', default=False, help='Print the current version of WAnaBRI and exit.')
+        others_group.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
 
-    # Printing ASCII art to terminal
-    if not args.colors or 'win' in sys.platform:
-        Color.disable()
+        args = parser.parse_args()
 
-    print(asciiart())
+        # Printing ASCII art to terminal
+        print(asciiart())
 
-    # Version
-    if args.version:
-        print(f"{G}[~]{E} The version of WAnaBRI you have is {B}v{__version__}{E}")
+        # Version
+        if args.version:
+            print(f"{G}[~]{E} The version of WAnaBRI you have is {B}v{__version__}{E}")
 
-    # Handle no Arguments inputed
-    if args.target is None:
-        parser.error(f"{R}No test target specified.{E}")
+        # Handle no Arguments inputed
+        if args.target is None:
+            print("usage: WAnaBRI.py [MODE] -t <target> [OPT] [OTHERS]")
+            print(f"{R}[!!]{E} No test target specified.")
+            sys.exit(1)
+        
 
-    targets = parse_target(args)
-    path = validate_output(args)
-
-    # Subdomain enumeration process
-    if args.subdomain_enumeration:
-        for target in targets:
+        # Subdomain enumeration process
+        if args.subdomain_enumeration and not args.target.endswith('.txt'):
+            # Initiating subdomain enumeration
+            target = args.target
+            path = validate_output(args, target)
             print(f"{G}[*]{E} The target website is {B}{target}{E}")
             print(f"{G}[*]{E} Starting subdomain enumeration for {B}{target}{E} using SubFinder")
+
+            # Run subfinder
             print("")
             subfinder(target, path)
             print("")
-            print(f"{G}[*]{E} The next step is to check the domains using domain_checker")
-            continue_prompt()
-            path_obj = Path(path)
-            output_path = path_obj.parent / f"{path_obj.stem}-probe.txt"
-            print("")
-            print(f"{G}[*]{E} Starting probe using httprobe\n")
-            run_httprobe(path, output_path)
-            print(f"\r{G}[~]{E} Probing finished. The output is saved to {B}{output_path}{E}")
-            print("")
-            print(f"{G}[*]{E} Domain checking started\n")
-            path_obj = Path(path)
-            output_path = path_obj.parent / f"{path_obj.stem}-checked.txt"
-            domain_checker(path, output_path)
-            print(f"\n{G}[~]{E} Domain checking finished. The output is saved to {B}{output_path}{E}")
 
-    else:
-        print(f"{args.target}")
+            if args.filter:
+                print(f"{G}[*]{E} Filtering the subdomains using domain_checker\n")
+                path_obj = Path(path)
+                output_path = path_obj.parent / f"{path_obj.stem}-filtered.txt"
+                domain_checker(path, output_path)
+                print(f"\n{G}[~]{E} Subdomain enumeration finished: Filtered output is saved to {B}{output_path}{E}")
+            
+            sys.exit(0)
+        
+        # Filter the subdomains using domain_checker
+        if args.domain_checker and args.target.endswith('.txt'):
+            # Initiating domain_checker
+            path = args.target
+            print(f"{G}[*]{E} The target file is {B}{path}{E}")
+            print(f"{G}[*]{E} Filtering the domains using domain_checker\n")
+            
+            # Run domain_checker
+            path_obj = Path(path)
+            output_path = path_obj.parent / f"{path_obj.stem}-filtered.txt"
+            domain_checker(path, output_path)
+
+            print(f"\n{G}[~]{E} Domain filtering finished: Filtered output is saved to {B}{output_path}{E}")
+        
+        else:
+            print(f"{R}[!!]{E} Invalid arguments: Wrong target format. Exiting.")
+            sys.exit(1)
+    
+    except KeyboardInterrupt:
+        print(f"\n{R}[!!]{E} Operation interrupted by user. Exiting.")
+        sys.exit(0)
+
+    except Exception as e:
+        print(f"\n{R}[!!]{E} An unexpected error occurred: {str(e)}. Exiting.")
+        sys.exit(1)
