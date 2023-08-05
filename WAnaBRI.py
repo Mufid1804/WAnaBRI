@@ -13,11 +13,33 @@ from pathlib import Path
 from datetime import datetime
 from bin.domain_checker import domain_checker
 from lib.asciiart import Color, asciiart
-
-__version__ = "0.0.3"
+from version import __version__
 
 # Default Variables
 (W,Y,G,R,B,C,E) = Color.unpack()
+
+# Tools dependency check
+def check_tools_dependency():
+    tools = {
+        'go': 'go version',
+        'subfinder': 'subfinder -version',
+        'httprobe': 'httprobe -h'
+    }
+
+    all_installed = True
+
+    for tool, command in tools.items():
+        try:
+            result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, check=True)
+            print(f"{tool} is installed.")
+        except subprocess.CalledProcessError:
+            print(f"{tool} is not installed.")
+            all_installed = False
+
+    if not all_installed:
+        print("One or more required tools are not installed. Exiting.")
+        print("Checnk installation guide at README.md")
+        sys.exit(1)
 
 # Function to validate the output file path
 def validate_output(args):
@@ -95,7 +117,7 @@ def continue_prompt():
             break
         elif choice in ('N', 'n'):
             print(f"{G}[~]{E} You chose 'no'. Exiting...")
-            exit()
+            sys.exit(1)
         else:
             print(f"{R}[!!]{E} Invalid choice. Please enter 'Y' or 'n', or press Enter for the default option.")
 
@@ -109,6 +131,9 @@ def parse_target(args):
 
 # Main function
 if __name__ == "__main__":
+    # Check tools dependency
+    check_tools_dependency()
+
     # Argument parsing
     parser = argparse.ArgumentParser(description="Web Application Firewall (WAF) Analyser BRI - WAnaBRI")
     parser.add_argument('-S', '--subdomain-enumeration', action='store_true', help='Enumerate subdomains using SubFinder')
