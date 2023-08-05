@@ -25,7 +25,7 @@
 
 To do its magic, WAnaBRI does the following:
 
-## Subdomain Enumeration
+### Subdomain Enumeration
 
 - Enumerate subdomain from target using [SubFinder](https://github.com/projectdiscovery/subfinder)
 - Probe the domain name using [httprobe](https://github.com/tomnomnom/httprobe), - - Filter the domain using domain_checker.
