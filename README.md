@@ -1,7 +1,7 @@
 <h1 align="center">
   <img src="lib/img/WAnaBRI-banner.png" alt="WAnaBRI"/></a>
   <br>
-  WAnaBRI
+  WAnaBRI v0.3
 </h1>
 <p align="center">
   <b>The Web Application Firewall (WAF) Analyzer tool for BRI</b>
