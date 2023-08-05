@@ -31,7 +31,6 @@ def check_tools_dependency():
     for tool, command in tools.items():
         try:
             result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, check=True)
-            print(f"{tool} is installed.")
         except subprocess.CalledProcessError:
             print(f"{tool} is not installed.")
             all_installed = False
