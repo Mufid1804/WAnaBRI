@@ -3,7 +3,7 @@ Web Application Firewall (WAF) Analyzer BRI
 
 # Installation
 
-`WAnaBRI` requires **go1.20** to install dependency tools successfully. The <token> can be obtained by asking Muhammad Mufid at muhammad.mufid@corp.bri.co.id or by contacting him via WhatsApp at 081328550320.
+`WAnaBRI` requires **go1.20** to install dependency tools successfully. The `TOKEN` can be obtained by asking Muhammad Mufid at muhammad.mufid@corp.bri.co.id or by contacting him via WhatsApp at 081328550320.
 
 ```console
 $ git clone https://<TOKEN>@github.com/Mufid1804/WAnaBRI.git
