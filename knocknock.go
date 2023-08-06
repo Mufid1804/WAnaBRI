@@ -1,3 +1,7 @@
+/* Copyright (c) 2023 Bank Rakyat Indonesia (Persero) Tbk.
+For internal purpose use only
+*/
+
 package main
 
 import (
