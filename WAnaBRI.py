@@ -166,9 +166,39 @@ if __name__ == "__main__":
             if args.filter:
                 print(f"{G}[*]{E} Filtering the subdomains using domain_checker\n")
                 path_obj = Path(path)
-                output_path = path_obj.parent / f"{path_obj.stem}-filtered.txt"
-                domain_checker(path, output_path)
+                output_path = path_obj.parent / f"./{path_obj.stem}-filtered.txt"
+                                
+                # t0 = time.time()
+                # domain_checker(path, output_path)
+                # t1 = time.time()
+                # print(t1-t0)
+                
+                # command = f"go run knocknock.go -i {path_obj}"
+                # process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                # # Collect the output from the subprocess
+                # output = []
+                # for line in iter(process.stdout.readline, b''):
+                #     output.append(line.decode().strip())
+
+                # # Wait for the process to finish
+                # process.wait()
+                # # Print the collected output
+                # print(f"\r{G}[~]{E} Done! Here's the output:\n")
+                # print("\n".join(output))
+                # print(f"\n{G}[~]{E} Subdomain enumeration finished: File output saved to {B}{path}{E}")
+                
+                command = ['go', 'run', 'knocknock.go', '-i', path_obj]
+                with subprocess.Popen(command, stdout = subprocess.PIPE) as p:
+                    while True:
+                        text = p.stdout.read1().decode("utf-8")
+                        if not text and p.poll() is not None:
+                            break
+                        print(text, end='', flush=True)
+                
                 print(f"\n{G}[~]{E} Subdomain enumeration finished: Filtered output is saved to {B}{output_path}{E}")
+
+                # Print the collected output
+                print(f"\r{G}[~]{E} Done! Here's the output:\n")
             
             sys.exit(0)
         
