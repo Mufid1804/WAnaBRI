@@ -2,7 +2,7 @@
   <img src="lib/img/WAnaBRI-banner.png" alt="WAnaBRI" width="600"/></a>
   <br>
   <br>
-  WAnaBRI v0.4
+  WAnaBRI v0.5
 </h1>
 <p align="center">
   <b>The Web Application Firewall (WAF) Analyzer tool for BRI</b>
@@ -28,7 +28,7 @@ To do its magic, `WAnaBRI` does the following:
 ### Subdomain Enumeration
 
 - Enumerate subdomain from target using [SubFinder](https://github.com/projectdiscovery/subfinder)
-- Filter the domain by HTTP/HTTPS request response, only accept 200 OK. (Could be excluded/standalone)
+- Filter the domain by HTTP/HTTPS request response, only accept 200 OK. Code based on GO.
 
 ## Usage
 

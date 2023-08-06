@@ -11,7 +11,6 @@ import time
 import threading
 from pathlib import Path
 from datetime import datetime
-from bin.domain_checker import domain_checker
 from lib.asciiart import Color, asciiart
 from version import __version__
 
@@ -122,12 +121,13 @@ if __name__ == "__main__":
         mode_group = parser.add_argument_group('Mode')
         exclusive_group = mode_group.add_mutually_exclusive_group()
         exclusive_group.add_argument('-S', '--subdomain-enumeration', action='store_true', help='Enumerate subdomains using SubFinder. Accepts only one target domain, e.g., -S bri.co.id')
-        exclusive_group.add_argument('-D', '--domain-checker', action='store_true', help='Filter 200 HTTP/HTTPS responses using the domain_checker tool. Accepts only a file, e.g., -D domains.txt')
+        exclusive_group.add_argument('-D', '--domain-checker', action='store_true', help='Filter 200 HTTP/HTTPS responses using the knocknock tool. Accepts only a file, e.g., -D domains.txt')
         
         # Options
         options_group = parser.add_argument_group('Options')
-        options_group.add_argument('--no-filter', action='store_false', dest='filter', help='Disable filtering of 200 HTTP/HTTPS responses using the domain_checker tool. Default is True.')
+        options_group.add_argument('--no-filter', action='store_false', dest='filter', help='Disable filtering of 200 HTTP/HTTPS responses using the knocknock.go tool. Default is True.')
         options_group.add_argument('-o', '--output', type=str, help='Name of the output file, e.g., -o output.txt. If not, default will be used.')
+        # options_group.add_argument('-c', '--concurrency', type=int, default=20, help='Number of concurrent threads to use. Default is 100.')
         
         # Others
         others_group = parser.add_argument_group('Others')
@@ -164,29 +164,11 @@ if __name__ == "__main__":
             print("")
 
             if args.filter:
-                print(f"{G}[*]{E} Filtering the subdomains using domain_checker\n")
+                print(f"{G}[*]{E} Filtering the subdomains using knocknock\n")
                 path_obj = Path(path)
-                output_path = path_obj.parent / f"./{path_obj.stem}-filtered.txt"
-                                
-                # t0 = time.time()
-                # domain_checker(path, output_path)
-                # t1 = time.time()
-                # print(t1-t0)
+                output_path = path_obj.parent / f"./{path_obj.stem}-valid.txt"
                 
-                # command = f"go run knocknock.go -i {path_obj}"
-                # process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                # # Collect the output from the subprocess
-                # output = []
-                # for line in iter(process.stdout.readline, b''):
-                #     output.append(line.decode().strip())
-
-                # # Wait for the process to finish
-                # process.wait()
-                # # Print the collected output
-                # print(f"\r{G}[~]{E} Done! Here's the output:\n")
-                # print("\n".join(output))
-                # print(f"\n{G}[~]{E} Subdomain enumeration finished: File output saved to {B}{path}{E}")
-                
+                # Subprocessing knockknock.go
                 command = ['go', 'run', 'knocknock.go', '-i', path_obj]
                 with subprocess.Popen(command, stdout = subprocess.PIPE) as p:
                     while True:
@@ -196,23 +178,29 @@ if __name__ == "__main__":
                         print(text, end='', flush=True)
                 
                 print(f"\n{G}[~]{E} Subdomain enumeration finished: Filtered output is saved to {B}{output_path}{E}")
-
-                # Print the collected output
-                print(f"\r{G}[~]{E} Done! Here's the output:\n")
             
             sys.exit(0)
         
-        # Filter the subdomains using domain_checker
+        # Filter the subdomains using knocknock
         if args.domain_checker and args.target.endswith('.txt'):
-            # Initiating domain_checker
+            # Initiating knocknock
             path = args.target
             print(f"{G}[*]{E} The target file is {B}{path}{E}")
-            print(f"{G}[*]{E} Filtering the domains using domain_checker\n")
+            print(f"{G}[*]{E} Filtering the domains using knocknock\n")
             
-            # Run domain_checker
+            # Run knocknock
             path_obj = Path(path)
-            output_path = path_obj.parent / f"{path_obj.stem}-filtered.txt"
-            domain_checker(path, output_path)
+            output_path = path_obj.parent / f"{path_obj.stem}-valid.txt"
+            
+            # Subprocessing knockknock.go
+            command = ['go', 'run', 'knocknock.go', '-i', path_obj, '-c', str(args.concurrency)]
+            with subprocess.Popen(command, stdout = subprocess.PIPE) as p:
+                while True:
+                    text = p.stdout.read1().decode("utf-8")
+                    if not text and p.poll() is not None:
+                        break
+                    print(text, end='', flush=True)
+
 
             print(f"\n{G}[~]{E} Domain filtering finished: Filtered output is saved to {B}{output_path}{E}")
         
